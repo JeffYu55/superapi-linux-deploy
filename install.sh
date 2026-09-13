@@ -14,7 +14,7 @@ REPO="${SUPERAPI_REPO:-JeffYu55/superapi-linux-deploy}"
 VERSION="${SUPERAPI_VERSION:-v1.1.0}"
 DEST="${SUPERAPI_DEST:-/opt/superapi}"
 BASE="https://github.com/${REPO}/releases/download/${VERSION}"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"   # 用 $0 而不是 BASH_SOURCE：`sh install.sh` 时 BASH_SOURCE 未定义
 LOCAL_DIR="${SUPERAPI_LOCAL_DIR:-$SCRIPT_DIR/dist}"   # 仓内发行包（clone 即得 → 可离线安装）
 
 command -v tar >/dev/null 2>&1 || { echo "[FATAL] 缺少依赖: tar" >&2; exit 1; }
