@@ -14,19 +14,15 @@ REPO="${SUPERAPI_REPO:-JeffYu55/superapi-linux-deploy}"
 VERSION="${SUPERAPI_VERSION:-v1.1.0}"
 DEST="${SUPERAPI_DEST:-/opt/superapi}"
 BASE="https://github.com/${REPO}/releases/download/${VERSION}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LOCAL_DIR="${SUPERAPI_LOCAL_DIR:-$SCRIPT_DIR/dist}"   # 仓内发行包（clone 即得 → 可离线安装）
 
-# 0) 依赖检查 + 下载器选择（curl 优先，回退 wget——精简镜像常无 curl）
-if command -v curl >/dev/null 2>&1; then
-  DL_KIND=curl
-elif command -v wget >/dev/null 2>&1; then
-  DL_KIND=wget
-else
-  echo "[FATAL] 需要 curl 或 wget 之一" >&2; exit 1
-fi
 command -v tar >/dev/null 2>&1 || { echo "[FATAL] 缺少依赖: tar" >&2; exit 1; }
 
 dl() {  # dl <url> <outfile>
-  if [ "$DL_KIND" = curl ]; then curl -fsSL -o "$2" "$1"; else wget -q -O "$2" "$1"; fi
+  if command -v curl >/dev/null 2>&1; then curl -fsSL -o "$2" "$1"
+  elif command -v wget >/dev/null 2>&1; then wget -q -O "$2" "$1"
+  else echo "[FATAL] 需要 curl 或 wget 之一" >&2; exit 1; fi
 }
 
 # 1) 架构检测
@@ -44,10 +40,18 @@ TARBALL="superapi-linux-${ARCH}.tar.gz"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
-echo "==> 目标架构: $ARCH  版本: $VERSION  下载器: $DL_KIND"
-echo "==> 下载 $TARBALL"
-dl "$BASE/$TARBALL" "$TMP/$TARBALL"
-dl "$BASE/SHA256SUMS.txt" "$TMP/SHA256SUMS.txt" || echo "    (校验和文件缺失，跳过校验)"
+echo "==> 目标架构: $ARCH  版本: $VERSION  目标: $DEST"
+
+# 1.5) 优先用仓内本地包（clone 即得 → 不联网也能装）；没有才回退 Release 下载
+if [ -f "$LOCAL_DIR/$TARBALL" ]; then
+  echo "==> 使用仓内本地包: $LOCAL_DIR/$TARBALL（免下载）"
+  cp "$LOCAL_DIR/$TARBALL" "$TMP/$TARBALL"
+  [ -f "$LOCAL_DIR/SHA256SUMS.txt" ] && cp "$LOCAL_DIR/SHA256SUMS.txt" "$TMP/SHA256SUMS.txt"
+else
+  echo "==> 仓内无本地包，从 Release 下载: $BASE/$TARBALL"
+  dl "$BASE/$TARBALL" "$TMP/$TARBALL"
+  dl "$BASE/SHA256SUMS.txt" "$TMP/SHA256SUMS.txt" || echo "    (校验和文件缺失，跳过校验)"
+fi
 
 # 2) SHA256 校验（跨平台哈希命令）
 if [ -s "$TMP/SHA256SUMS.txt" ]; then

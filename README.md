@@ -25,6 +25,7 @@ SuperAPI 本身是一个多方言 LLM 网关：账户池、熔断、PoW 反爬�
 | `tools/relay_heal.sh` | 反代自愈：VM 停则启动、进程死则拉起，直到 `/status` 就绪 |
 | `tools/ds_auth.sh` | DeepSeek userToken 验活 / 换取 / 重启反代（带单实例锁等待） |
 | `deploy/launchd/*.plist` | macOS 常驻托管模板（代理 + 反代看门狗） |
+| `dist/*.tar.gz` | **两架构发行包（直接入仓，clone 即得）** + `SHA256SUMS.txt` |
 | `docs/DEPLOY.md` | 服务器部署手册 |
 | `docs/PROXY.md` | 转换层修复原理、效果数据与排障速查 |
 | `docs/REVERSE_NOTES.md` | 逆向要点：激活链、参数表、实例锁、PoW |
@@ -38,9 +39,9 @@ SuperAPI 本身是一个多方言 LLM 网关：账户池、熔断、PoW 反爬�
 ## 快速部署
 
 ```bash
-# 方式 A：一键安装（推荐）——clone 后跑一条命令，自动拉 Release 发行包
+# 方式 A：一键安装（推荐）——clone 即得：仓内自带发行包，离线也能装
 git clone https://github.com/JeffYu55/superapi-linux-deploy.git
-cd superapi-linux-deploy && bash install.sh
+cd superapi-linux-deploy && bash install.sh      # 有 dist/ 就用本地包；没有才回退 Release 下载
 vi /opt/superapi/superapi.env    # 填 SUPERAPI_TOKEN 与 SUPERAPI_APIKEY（install.sh 已建好空模板）
 cd /opt/superapi && ./run.sh     # 前台试跑，出现 "SuperAPI Gateway Server Started" 即成功
 cp /opt/superapi/superapi.service /etc/systemd/system/ \
@@ -58,8 +59,9 @@ curl http://127.0.0.1:8080/healthz
 > `install.sh` 只做搬运与写模板：**不启动服务、不改 systemd、不覆盖已存在的 `superapi.env`**；
 > 可用 `SUPERAPI_DEST=~/superapi` 换安装目录、`SUPERAPI_VERSION=v1.1.0` 指定版本。
 >
-> **本仓库不含程序本体**——直接 `git clone` 得到的是脚本与文档，发行二进制通过
-> [Releases](../../releases) 分发（`install.sh` 会自动拉取并校验 SHA256）。
+> **发行包直接入仓**：`dist/superapi-linux-{amd64,arm64}.tar.gz` + `SHA256SUMS.txt` 已在仓库里，
+> `git clone` 即得、离线可装；[Releases](../../releases) 作为备用通道保留（`install.sh` 在仓内无本地包时自动回退下载）。
+> 未打包的原始二进制（`unpacked/`）仍不入仓。
 
 客户端接入：
 

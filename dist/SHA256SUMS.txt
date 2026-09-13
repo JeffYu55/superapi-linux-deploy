@@ -1,0 +1,2 @@
+dfa6e7ac51399d62037a27260985bae83584dbaa0d6bef4497efebd7e8294f47  superapi-linux-amd64.tar.gz
+9f8276e54f1c15af0777dd3c8e08e588ef91e1812eebb18740743d6afc435c15  superapi-linux-arm64.tar.gz

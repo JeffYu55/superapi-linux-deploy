@@ -44,3 +44,9 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+
+# ===== 白名单（必须放最后：git 后出现的规则覆盖前面的）=====
+# 发行包直接入仓，clone 即得；未打包的 unpacked/ 与其它大文件仍然忽略
+!dist/
+!dist/*.tar.gz
+!dist/SHA256SUMS.txt
