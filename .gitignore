@@ -1,0 +1,39 @@
+# ===== 凭据（绝不入仓）=====
+.ds_user_token
+*.env
+superapi.env
+*credentials*
+*token*
+!.gitignore
+
+# ===== 二进制与发行包（走 Release，不入仓）=====
+*.tar.gz
+*.tgz
+*.zip
+unpacked/
+dist-server/
+dist/
+*.exe
+*.so
+*.dylib
+superapi
+superapi-linux-*
+superapi-*.app/
+
+# ===== 会话/临时产物 =====
+config.json
+accounts.json
+sessions/
+context_*.txt
+*.log
+*.lock
+*.pid
+
+# ===== 系统噪音 =====
+.DS_Store
+._*
+__MACOSX/
+__pycache__/
+*.pyc
+.venv/
+venv/
