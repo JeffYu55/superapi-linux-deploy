@@ -21,8 +21,17 @@ SuperAPI 本身是一个多方言 LLM 网关：账户池、熔断、PoW 反爬�
 | `tools/d1_pack_check.py` | 部署包结构与可执行性校验（含隔离重构） |
 | `tools/d2_linux_x86_check.py` | 真 Linux 端到端：起服 → 探活 → 真对话 |
 | `tools/d3_dist_check.py` | 发行归档打包与解压校验（防 AppleDouble 污染） |
+| `tools/superapi-fix-proxy.py` | **转换层修复代理**：补嵌套参数/截断抢救/EPSE 清污/连接容错与自愈 |
+| `tools/relay_heal.sh` | 反代自愈：VM 停则启动、进程死则拉起，直到 `/status` 就绪 |
+| `tools/ds_auth.sh` | DeepSeek userToken 验活 / 换取 / 重启反代（带单实例锁等待） |
+| `deploy/launchd/*.plist` | macOS 常驻托管模板（代理 + 反代看门狗） |
 | `docs/DEPLOY.md` | 服务器部署手册 |
+| `docs/PROXY.md` | 转换层修复原理、效果数据与排障速查 |
 | `docs/REVERSE_NOTES.md` | 逆向要点：激活链、参数表、实例锁、PoW |
+
+> **客户端接哪条链路**：直连性能最好，但 SuperAPI 的转换层有四个已知缝（嵌套参数被压成字符串、
+> 输出截断丢半条、`<|EPSE|…>` 标记漏进上下文、上游挂了直接 502）。用 agent/工具调用类客户端
+> （如 DSH）时，建议把 Base URL 指向本代理 `18091`，细节与实测数据见 [`docs/PROXY.md`](docs/PROXY.md)。
 
 ---
 
@@ -89,6 +98,43 @@ python3 tools/d1_pack_check.py               # 结构校验
 | `/anthropic/v1/messages`、`/v1/messages` | Anthropic 方言 |
 | `/api/chat`、`/api/generate`、`/api/tags` | Ollama 方言 |
 | `/healthz`、`/status` | 健康 / 状态（含账号可用数、调用计数） |
+
+---
+
+## agent 客户端接入（含 macOS 常驻托管）
+
+直接连 18090 能用，但工具调用会踩转换层的缝。给 agent 用的时候走代理：
+
+```bash
+# 1) 起代理（或交给 launchd 托管，见下）
+python3 tools/superapi-fix-proxy.py --port 18091 --upstream http://127.0.0.1:18090 --debug
+
+# 2) 客户端 Base URL 指向它
+#    Base URL : http://127.0.0.1:18091/v1
+#    API Key  : 与 SuperAPI 的 SUPERAPI_APIKEY 相同
+```
+
+macOS 想常驻（登录自启 + 崩了自拉 + 反代被睡眠打死自动救活）：
+
+```bash
+mkdir -p ~/.dsh ~/Library/LaunchAgents
+cp tools/relay_heal.sh ~/.dsh/            # 必须放 TCC 保护目录之外（别放 ~/Downloads）
+cp tools/superapi-fix-proxy.py ~/.dsh/
+
+for f in fix-proxy relay-watchdog; do
+  sed "s#__HOME__#$HOME#g" deploy/launchd/com.jeff.superapi-$f.plist \
+    > ~/Library/LaunchAgents/com.jeff.superapi-$f.plist
+  launchctl load -w ~/Library/LaunchAgents/com.jeff.superapi-$f.plist
+done
+
+launchctl list | grep superapi      # 两个作业都在即可
+sh tools/relay_heal.sh              # 手动救一次（VM 停/进程死都管）
+sh tools/ds_auth.sh check           # token 还活着吗（40003 = 失效，重取）
+```
+
+> 为什么脚本要放 `~/.dsh/`：`~/Downloads`、`~/Documents`、`~/Desktop` 受 macOS TCC 保护，
+> **launchd 起的进程读不了**，会以 `Operation not permitted` 静默失败。
+> 同理，launchd 的 PATH 里没有 `/opt/homebrew/bin`，所以自愈脚本内部走绝对路径找 `limactl`。
 
 ---
 

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- 转换层代理：DSH → 18091(本代理) → 18090(SuperAPI) → DeepSeek
+     安装：sed "s#__HOME__#$HOME#g" 本文件 > ~/Library/LaunchAgents/com.jeff.superapi-fix-proxy.plist
+           launchctl load -w ~/Library/LaunchAgents/com.jeff.superapi-fix-proxy.plist
+     注意：脚本必须放在 TCC 保护目录之外（~/Downloads、~/Documents、~/Desktop 都读不了） -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.jeff.superapi-fix-proxy</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/python3</string>
+    <string>__HOME__/.dsh/superapi-fix-proxy.py</string>
+    <string>--port</string><string>18091</string>
+    <string>--upstream</string><string>http://127.0.0.1:18090</string>
+    <string>--heal-script</string><string>__HOME__/.dsh/relay_heal.sh</string>
+    <string>--debug</string>
+  </array>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>StandardOutPath</key><string>/tmp/fix-proxy.log</string>
+  <key>StandardErrorPath</key><string>/tmp/fix-proxy.log</string>
+  <key>EnvironmentVariables</key>
+  <dict><key>PATH</key><string>/usr/bin:/bin:/usr/sbin:/sbin</string></dict>
+</dict>
+</plist>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- 反代看门狗：每 30s 巡检 18090，VM 停/进程死就自动拉起（Mac 睡眠醒来后自动恢复）
+     安装方式同 fix-proxy；PATH 必须含 limactl 所在目录（脚本内部也会自己找绝对路径） -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.jeff.superapi-relay-watchdog</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/sh</string>
+    <string>__HOME__/.dsh/relay_heal.sh</string>
+    <string>60</string>
+  </array>
+  <key>StartInterval</key><integer>30</integer>
+  <key>RunAtLoad</key><true/>
+  <key>StandardOutPath</key><string>/tmp/relay-watchdog.log</string>
+  <key>StandardErrorPath</key><string>/tmp/relay-watchdog.log</string>
+  <key>EnvironmentVariables</key>
+  <dict><key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string></dict>
+</dict>
+</plist>

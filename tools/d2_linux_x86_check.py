@@ -1,3 +1,4 @@
+import os
 #!/usr/bin/env python3
 """d2_linux_x86_check.py — D2 判据（真 x86_64 Linux 端到端）
 
@@ -14,8 +15,8 @@
 import json, os, shutil, socket, subprocess, sys, tempfile, time
 import urllib.request, urllib.error
 
-BUILD = os.environ.get("SUPERAPI_BUILD", "/Users/jeff/Downloads/v0.2/packaging/build_server_pack.sh")
-TOKENFILE = os.environ.get("SUPERAPI_TOKEN_FILE", "/Users/jeff/Downloads/v0.2/.ds_user_token")
+BUILD = os.environ.get("SUPERAPI_BUILD", os.path.join(os.path.expanduser("~"), "Downloads/v0.2", "packaging/build_server_pack.sh"))
+TOKENFILE = os.environ.get("SUPERAPI_TOKEN_FILE", os.path.join(os.path.expanduser("~"), "Downloads/v0.2", ".ds_user_token"))
 VM = "linuxx86"
 PORT = 18101
 

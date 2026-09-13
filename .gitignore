@@ -6,6 +6,13 @@ superapi.env
 *token*
 !.gitignore
 
+# ===== 白名单：仓库自带的运维脚本（名字里带 token 也不许被误吞）=====
+!tools/*.sh
+!tools/*.py
+!tests/*.py
+!docs/*.md
+!deploy/launchd/*.plist
+
 # ===== 二进制与发行包（走 Release，不入仓）=====
 *.tar.gz
 *.tgz

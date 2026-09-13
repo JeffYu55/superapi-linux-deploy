@@ -1,3 +1,4 @@
+import os
 #!/usr/bin/env python3
 """d1_pack_check.py — D1 判据（全链路行为型，对写入面每条依赖链敏感）
 
@@ -14,10 +15,10 @@
 """
 import json, os, shutil, struct, subprocess, sys, tempfile
 
-BUILD = os.environ.get("SUPERAPI_BUILD", "/Users/jeff/Downloads/v0.2/packaging/build_server_pack.sh")
-ROOT = os.environ.get("SUPERAPI_ROOT", "/Users/jeff/Downloads/v0.2/dist-server")
-CFG_A = os.environ.get("SUPERAPI_ROOT", "/Users/jeff/Downloads/v0.2/dist-server/superapi-linux-amd64/config.json")
-RUN_A = os.environ.get("SUPERAPI_ROOT", "/Users/jeff/Downloads/v0.2/dist-server/superapi-linux-amd64/run.sh")
+BUILD = os.environ.get("SUPERAPI_BUILD", os.path.join(os.path.expanduser("~"), "Downloads/v0.2", "packaging/build_server_pack.sh"))
+ROOT = os.environ.get("SUPERAPI_ROOT", os.path.join(os.path.expanduser("~"), "Downloads/v0.2", "dist-server"))
+CFG_A = os.environ.get("SUPERAPI_ROOT", os.path.join(os.path.expanduser("~"), "Downloads/v0.2", "dist-server/superapi-linux-amd64/config.json"))
+RUN_A = os.environ.get("SUPERAPI_ROOT", os.path.join(os.path.expanduser("~"), "Downloads/v0.2", "dist-server/superapi-linux-amd64/run.sh"))
 ARCHS = [("amd64", 0x3E), ("arm64", 0xB7)]
 REQUIRED = ["superapi", "config.json", "accounts.json", "run.sh",
             "superapi.service", "superapi.env", "README.md"]

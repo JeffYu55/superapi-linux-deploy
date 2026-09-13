@@ -98,9 +98,33 @@ systemctl restart superapi
 | `[INSTANCE] 检测到已有实例正在运行` | 单实例锁：先停旧进程再启；确实要多开则加 `-multi-instance` |
 | `[FATAL] account file not found: accounts.json` | 传了 `-account` 但文件不存在；单账号用 `-token` 即可，不必用账号文件 |
 | `[FATAL] 未提供 SUPERAPI_TOKEN` | `superapi.env` 未填 token，或 run.sh 未读到该文件 |
-| `/status` 显示账号 `is_available: false` | token 过期或账号被限；重取 userToken |
+| `/status` 显示账号 `is_available: false` | token 过期或账号被限；重取 userToken（`sh tools/ds_auth.sh check` 一行验活：`40003` = 失效） |
 | 端口占用 | 改 `SUPERAPI_PORT`，或先 `ss -lntp` 查出占用进程 |
 | 502 / `POW_FAIL` | 上游风控（PoW 校验）或网络问题；稍后重试，必要时设 `SUPERAPI_PROXY` |
+
+### 6.1 账号池状态怎么读
+
+`curl -H "Authorization: Bearer $APIKEY" http://127.0.0.1:8080/status`：
+
+| 字段 | 含义 | 处置 |
+|---|---|---|
+| `accounts.available` | 可用账号数。`0` = 所有请求都会失败或排队 | 看下面几个标记 |
+| `is_cooling_down` / `cooldown_until` | 反代**自身**的冷静期：连续 error 触发（默认 `cooldown_minutes: 15`） | 是突发请求喂出来的，批测请串行；可调小 `cooldown_minutes` |
+| `is_circuit_broken` / `last_error_code` | 熔断。`401 (封号/失效)` = userToken 已死 | 换 token 并重启反代 |
+| `is_muted` / `mute_until` | 被禁言 | 等解禁或换账号 |
+| `forwarding.allowed` | 转发总闸；被 trip 时看 `tripped_reason` | 按原因处置 |
+| `queue_enabled: true` | 冷静期内请求**排队干等**（表现为挂起数分钟） | 想快速失败就关掉它 |
+
+这几个标记**都不是**上游风控，是反代自己的账号池逻辑；`total=1` 时没有第二个账号可切，也就谈不上容灾。
+
+### 6.2 反代挂了自动救人
+
+```sh
+sh tools/relay_heal.sh          # VM 停则 limactl start，进程死则起 run.sh，直到 /status 回 200
+```
+
+macOS 上配合 `deploy/launchd/com.jeff.superapi-relay-watchdog.plist` 每 30s 巡检一次；
+Linux 服务器直接用 systemd 的 `Restart=always`（发行包里的 `superapi.service` 已带）。
 
 ## 七、安全建议
 

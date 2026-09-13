@@ -1,3 +1,4 @@
+import os
 #!/usr/bin/env python3
 """d3_dist_check.py — D3 判据（行为型）：分发归档
 
@@ -11,8 +12,8 @@
 """
 import json, os, shutil, struct, subprocess, sys, tarfile, tempfile
 
-BUILD = os.environ.get("SUPERAPI_BUILD", "/Users/jeff/Downloads/v0.2/packaging/build_server_pack.sh")
-OUTDIR = os.environ.get("SUPERAPI_ROOT", "/Users/jeff/Downloads/v0.2/dist-server")
+BUILD = os.environ.get("SUPERAPI_BUILD", os.path.join(os.path.expanduser("~"), "Downloads/v0.2", "packaging/build_server_pack.sh"))
+OUTDIR = os.environ.get("SUPERAPI_ROOT", os.path.join(os.path.expanduser("~"), "Downloads/v0.2", "dist-server"))
 ARCHS = [("amd64", 0x3E), ("arm64", 0xB7)]
 REQUIRED = ["superapi", "config.json", "accounts.json", "run.sh",
             "superapi.service", "superapi.env", "README.md"]
