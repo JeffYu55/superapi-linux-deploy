@@ -29,16 +29,28 @@ SuperAPI 本身是一个多方言 LLM 网关：账户池、熔断、PoW 反爬�
 ## 快速部署
 
 ```bash
-# 服务器上（x86_64）
-tar -xzf superapi-linux-amd64.tar.gz -C /opt
-mv /opt/superapi-linux-amd64 /opt/superapi && cd /opt/superapi
+# 方式 A：一键安装（推荐）——clone 后跑一条命令，自动拉 Release 发行包
+git clone https://github.com/JeffYu55/superapi-linux-deploy.git
+cd superapi-linux-deploy && bash install.sh
+vi /opt/superapi/superapi.env    # 填 SUPERAPI_TOKEN 与 SUPERAPI_APIKEY（install.sh 已建好空模板）
+cd /opt/superapi && ./run.sh     # 前台试跑，出现 "SuperAPI Gateway Server Started" 即成功
+cp /opt/superapi/superapi.service /etc/systemd/system/ \
+  && systemctl daemon-reload && systemctl enable --now superapi
 
-vi superapi.env                 # 填 SUPERAPI_TOKEN 与 SUPERAPI_APIKEY
-cp superapi.service /etc/systemd/system/
-systemctl daemon-reload && systemctl enable --now superapi
+# 方式 B：直接下发行包（不经 git）
+#   curl -LO https://github.com/JeffYu55/superapi-linux-deploy/releases/download/v1.0.0/superapi-linux-amd64.tar.gz
+#   tar -xzf superapi-linux-amd64.tar.gz -C /opt && mv /opt/superapi-linux-amd64 /opt/superapi
+#   cd /opt/superapi && vi superapi.env && cp superapi.service /etc/systemd/system/ \
+#     && systemctl daemon-reload && systemctl enable --now superapi
 
 curl http://127.0.0.1:8080/healthz
 ```
+
+> `install.sh` 只做搬运与写模板：**不启动服务、不改 systemd、不覆盖已存在的 `superapi.env`**；
+> 可用 `SUPERAPI_DEST=~/superapi` 换安装目录、`SUPERAPI_VERSION=v1.0.0` 指定版本。
+>
+> **本仓库不含程序本体**——直接 `git clone` 得到的是脚本与文档，发行二进制通过
+> [Releases](../../releases) 分发（`install.sh` 会自动拉取并校验 SHA256）。
 
 客户端接入：
 

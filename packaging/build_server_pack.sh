@@ -1,12 +1,26 @@
 #!/bin/bash
 # build_server_pack.sh — 生成 SuperAPI Linux 服务器部署包（amd64 + arm64）
-# 产物: dist-server/superapi-linux-{amd64,arm64}/
-# 原则: 二进制零修改（直接拷解壳产物）；凭据不写死（走环境变量/EnvironmentFile）
+# 产物: <ROOT>/dist-server/superapi-linux-{amd64,arm64}/（可用 $1 覆盖输出目录）
+# 二进制源: <ROOT>/unpacked/ 或环境变量 SUPERAPI_BIN_DIR 指定
+# 原则: 二进制零修改（直接拷原版产物）；凭据不写死（走环境变量/EnvironmentFile）
 set -euo pipefail
 
-ROOT="/Users/jeff/Downloads/v0.2"
+# 根目录从脚本自身位置推导（可移植），允许 SUPERAPI_ROOT 覆盖
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="${SUPERAPI_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
 OUT="${1:-$ROOT/dist-server}"
 UNPACKED="${SUPERAPI_BIN_DIR:-$ROOT/unpacked}"
+
+# 源校验：缺二进制必须立刻失败（不静默读别处）
+for a in amd64 arm64; do
+  src="$UNPACKED/superapi-linux-$a"
+  if [ ! -f "$src" ]; then
+    echo "[FATAL] 未找到二进制源: $src" >&2
+    echo "        请把 SuperAPI 的 Linux 可执行文件放到 $UNPACKED/（命名 superapi-linux-amd64 / superapi-linux-arm64），" >&2
+    echo "        或用 SUPERAPI_BIN_DIR=/path/to/dir 指定；亦可直接下载本仓库 Release 里的发行包。" >&2
+    exit 1
+  fi
+done
 
 build_arch() {
   local arch="$1"
