@@ -47,7 +47,7 @@ cp /opt/superapi/superapi.service /etc/systemd/system/ \
   && systemctl daemon-reload && systemctl enable --now superapi
 
 # 方式 B：直接下发行包（不经 git）
-#   curl -LO https://github.com/JeffYu55/superapi-linux-deploy/releases/download/v1.0.0/superapi-linux-amd64.tar.gz
+#   curl -LO https://github.com/JeffYu55/superapi-linux-deploy/releases/download/v1.1.0/superapi-linux-amd64.tar.gz
 #   tar -xzf superapi-linux-amd64.tar.gz -C /opt && mv /opt/superapi-linux-amd64 /opt/superapi
 #   cd /opt/superapi && vi superapi.env && cp superapi.service /etc/systemd/system/ \
 #     && systemctl daemon-reload && systemctl enable --now superapi
@@ -56,7 +56,7 @@ curl http://127.0.0.1:8080/healthz
 ```
 
 > `install.sh` 只做搬运与写模板：**不启动服务、不改 systemd、不覆盖已存在的 `superapi.env`**；
-> 可用 `SUPERAPI_DEST=~/superapi` 换安装目录、`SUPERAPI_VERSION=v1.0.0` 指定版本。
+> 可用 `SUPERAPI_DEST=~/superapi` 换安装目录、`SUPERAPI_VERSION=v1.1.0` 指定版本。
 >
 > **本仓库不含程序本体**——直接 `git clone` 得到的是脚本与文档，发行二进制通过
 > [Releases](../../releases) 分发（`install.sh` 会自动拉取并校验 SHA256）。

@@ -4,14 +4,14 @@
 # 用法：
 #   bash install.sh                     # 装到 /opt/superapi（需写权限）
 #   SUPERAPI_DEST=~/superapi bash install.sh
-#   SUPERAPI_VERSION=v1.0.0 bash install.sh
+#   SUPERAPI_VERSION=v1.1.0 bash install.sh
 #
 # 行为：检测架构 → 下载对应发行包 → 校验 SHA256 → 解压 → 生成 env 模板
 #      **不启动服务、不改 systemd、不覆盖已存在的 superapi.env**
 set -euo pipefail
 
 REPO="${SUPERAPI_REPO:-JeffYu55/superapi-linux-deploy}"
-VERSION="${SUPERAPI_VERSION:-v1.0.0}"
+VERSION="${SUPERAPI_VERSION:-v1.1.0}"
 DEST="${SUPERAPI_DEST:-/opt/superapi}"
 BASE="https://github.com/${REPO}/releases/download/${VERSION}"
 
